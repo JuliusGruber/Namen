@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Namen - Dynamic Name Printer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✨ Namen</h1>
+            <p class="subtitle">Your name, infinitely styled</p>
+        </header>
+
+        <div class="input-section">
+            <input
+                type="text"
+                id="nameInput"
+                placeholder="Enter your name..."
+                autocomplete="off"
+                autofocus
+            >
+            <div class="button-group">
+                <button id="printBtn" class="btn btn-primary">Print</button>
+                <button id="resetBtn" class="btn btn-secondary">Reset</button>
+            </div>
+        </div>
+
+        <div id="displayArea" class="display-area"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
