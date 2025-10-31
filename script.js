@@ -69,7 +69,6 @@ function generateRandomStyle() {
     const rotation = Math.floor(Math.random() * 31) - 15; // -15 to +15
     const letterSpacing = Math.floor(Math.random() * 9) - 1; // -1 to 8
     const wordSpacing = Math.floor(Math.random() * 21); // 0 to 20
-    const skewX = Math.floor(Math.random() * 21) - 10; // -10 to +10
 
     // Randomly choose color or gradient
     const useGradient = Math.random() > 0.5;
@@ -80,22 +79,24 @@ function generateRandomStyle() {
     const bgOpacity = (Math.random() * 0.3 + 0.1).toFixed(2); // 0.1 to 0.4
     const bgColor = colors[Math.floor(Math.random() * colors.length)];
 
-    // Random shadow effects
+    // Random shadow effects (only if not using gradient)
     const shadowType = Math.floor(Math.random() * 4);
-    let textShadow;
-    switch(shadowType) {
-        case 0:
-            textShadow = `2px 2px 4px rgba(0,0,0,0.3)`;
-            break;
-        case 1:
-            textShadow = `0 0 10px ${textColor}, 0 0 20px ${textColor}`;
-            break;
-        case 2:
-            textShadow = `3px 3px 0 rgba(0,0,0,0.1), 6px 6px 0 rgba(0,0,0,0.1)`;
-            break;
-        case 3:
-            textShadow = `1px 1px 2px rgba(0,0,0,0.2)`;
-            break;
+    let textShadow = 'none';
+    if (!useGradient) {
+        switch(shadowType) {
+            case 0:
+                textShadow = '2px 2px 4px rgba(0,0,0,0.3)';
+                break;
+            case 1:
+                textShadow = `0 0 10px ${textColor}, 0 0 20px ${textColor}`;
+                break;
+            case 2:
+                textShadow = '3px 3px 0 rgba(0,0,0,0.1), 6px 6px 0 rgba(0,0,0,0.1)';
+                break;
+            case 3:
+                textShadow = '1px 1px 2px rgba(0,0,0,0.2)';
+                break;
+        }
     }
 
     // Random text decoration
@@ -108,15 +109,10 @@ function generateRandomStyle() {
     const borderStyles = ['solid', 'dashed', 'dotted', 'double'];
     const borderStyle = borderStyles[Math.floor(Math.random() * borderStyles.length)];
 
-    return {
+    const style = {
         fontFamily: fonts[Math.floor(Math.random() * fonts.length)],
         fontSize: `${fontSize}px`,
-        color: useGradient ? 'transparent' : textColor,
-        background: useGradient ? gradient : `rgba(${hexToRgb(bgColor)}, ${bgOpacity})`,
-        backgroundClip: useGradient ? 'text' : 'padding-box',
-        WebkitBackgroundClip: useGradient ? 'text' : 'padding-box',
-        textShadow: useGradient ? 'none' : textShadow,
-        transform: `rotate(${rotation}deg) skewX(${skewX}deg)`,
+        textShadow: textShadow,
         letterSpacing: `${letterSpacing}px`,
         wordSpacing: `${wordSpacing}px`,
         textTransform: textTransforms[Math.floor(Math.random() * textTransforms.length)],
@@ -124,8 +120,23 @@ function generateRandomStyle() {
         border: borderWidth > 0 ? `${borderWidth}px ${borderStyle} ${borderColor}` : 'none',
         padding: '10px 20px',
         borderRadius: `${Math.floor(Math.random() * 20)}px`,
-        animation: animations[Math.floor(Math.random() * animations.length)]
+        animation: animations[Math.floor(Math.random() * animations.length)],
+        rotation: rotation // Store rotation separately to apply after animation
     };
+
+    // Handle gradient vs solid color
+    if (useGradient) {
+        style.background = gradient;
+        style.webkitBackgroundClip = 'text';
+        style.backgroundClip = 'text';
+        style.webkitTextFillColor = 'transparent';
+        style.color = 'transparent';
+    } else {
+        style.color = textColor;
+        style.backgroundColor = `rgba(${hexToRgb(bgColor)}, ${bgOpacity})`;
+    }
+
+    return style;
 }
 
 // Helper function to convert hex to RGB
@@ -166,11 +177,24 @@ function printName() {
 
         const styles = generateRandomStyle();
         const animationClass = styles.animation;
+        const rotation = styles.rotation;
         delete styles.animation;
+        delete styles.rotation;
 
-        // Apply styles
+        // Apply base styles
         Object.assign(nameItem.style, styles);
+
+        // Add animation class
         nameItem.classList.add(animationClass);
+
+        // Apply rotation after animation completes
+        setTimeout(() => {
+            if (nameItem.style.transform) {
+                nameItem.style.transform += ` rotate(${rotation}deg)`;
+            } else {
+                nameItem.style.transform = `rotate(${rotation}deg)`;
+            }
+        }, 800); // Wait for animation to complete
 
         displayArea.appendChild(nameItem);
 
@@ -205,4 +229,6 @@ nameInput.addEventListener('keypress', (e) => {
 });
 
 // Focus input on load
-nameInput.focus();
+window.addEventListener('DOMContentLoaded', () => {
+    nameInput.focus();
+});
